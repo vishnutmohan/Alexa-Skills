@@ -6,7 +6,7 @@ const languageStrings = {
         'translation': {
             'WELCOME': "Hi! Welcome to teacher.",
             'TITLE': "GraspIO Teacher",
-            'HELP': "I have two modes to start. Play, and teach. Which one do you want?",
+            'HELP': "I have three modes to start. Play, learn and teach. Which one do you want?",
             'STOP': "Okay, see you next time! "
         }
     }
@@ -46,11 +46,8 @@ exports.handler = function (event, context, callback) {
 const handlers = {
     'LaunchRequest': function () {
         if (!this.attributes['currentStep']) {
-
             var say = this.t('WELCOME') + ' ' + this.t('HELP');
-
             this.response.cardRenderer(this.t('TITLE'), this.t('WELCOME'), welcomeCardImg);
-
         } else {
 
             var say = 'Welcome back.  You were on ' +
@@ -66,9 +63,9 @@ const handlers = {
     'ModeIntent': function () {
         var mode = this.event.request.intent.slots.mode.value;
         console.log("Request: ", this.event);
-        if (mode === 'play'||mode === 'code') {
+        if (mode === 'play' || mode === 'learn') {
             this.attributes['currentStep'] = mode;
-            var say = "You are in play mode now. You can give me the direction";
+            var say = "You are in " + mode + " mode now. You can give me the direction";
             var postData = {
                 payload: mode
             };
@@ -104,7 +101,7 @@ const handlers = {
     },
 
     'DirectionIntent': function () {
-        if (this.attributes['currentStep'] === "play"||this.attributes['currentStep'] === "code") {
+        if (this.attributes['currentStep'] === "play") {
             var direction = this.event.request.intent.slots.direction.value;
             if (direction === "straight" || direction === "forward" || direction === "front") {
                 var say = "moving " + direction;
@@ -117,6 +114,7 @@ const handlers = {
             } else {
                 var say = "I can't move in that direction. Sorry!"
             }
+            var say = "ok";
             var postData = {
                 payload: direction
             };
@@ -129,7 +127,7 @@ const handlers = {
                 self.response.speak(say).listen(say);
                 self.emit(':responseReady');
             });
-        } else {}
+        }
     },
 
     'AMAZON.YesIntent': function () {
@@ -186,9 +184,6 @@ const handlers = {
     'AMAZON.StartOverIntent': function () {
         delete this.attributes['currentStep'];
         this.emit('LaunchRequest');
-    },
-    'AMAZON.NoIntent': function () {
-        this.emit('AMAZON.StopIntent');
     },
     'AMAZON.HelpIntent': function () {
         this.response.speak(this.t('HELP')).listen(this.t('HELP'));
