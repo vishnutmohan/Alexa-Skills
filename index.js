@@ -6,7 +6,7 @@ const languageStrings = {
         'translation': {
             'WELCOME': "Hi! Welcome to teacher.",
             'TITLE': "GraspIO Teacher",
-            'HELP': "I have three modes to start. Play, learn and teach. Which one do you want?",
+            'HELP': "I have three modes to start. Play, learn and teach. Kindly select one mode.",
             'STOP': "Okay, see you next time! "
         }
     }
@@ -101,8 +101,8 @@ const handlers = {
     },
 
     'DirectionIntent': function () {
+        var direction = this.event.request.intent.slots.direction.value;
         if (this.attributes['currentStep'] === "play") {
-            var direction = this.event.request.intent.slots.direction.value;
             if (direction === "straight" || direction === "forward" || direction === "front") {
                 var say = "moving " + direction;
             } else if (direction === "back" || direction === "backward") {
@@ -114,7 +114,6 @@ const handlers = {
             } else {
                 var say = "I can't move in that direction. Sorry!"
             }
-            var say = "ok";
             var postData = {
                 payload: direction
             };
@@ -124,6 +123,20 @@ const handlers = {
                 method: 'POST',
                 json: postData
             }, function (error, response, body) {
+                self.response.speak(say).listen(say);
+                self.emit(':responseReady');
+            });
+        } else if(this.attributes['currentStep'] === "learn") {
+            var postData = {
+                payload: direction
+            };
+            var self = this;
+            request({
+                url: 'https://graspio-alexa-app.herokuapp.com/send-data',
+                method: 'POST',
+                json: postData
+            }, function (error, response, body) {
+                var say = " ";
                 self.response.speak(say).listen(say);
                 self.emit(':responseReady');
             });
